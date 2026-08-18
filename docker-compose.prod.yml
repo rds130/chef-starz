@@ -1,0 +1,9 @@
+services:
+  backend:
+    image: maruf318/chefstarz:backend-latest
+    container_name: chef_starz-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - backend/.env
+    restart: always
