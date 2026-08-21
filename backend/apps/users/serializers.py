@@ -190,3 +190,36 @@ class GoogleLoginSerializer(serializers.Serializer):
 class AppleLoginSerializer(serializers.Serializer):
     id_token = serializers.CharField()
     email = serializers.EmailField(required=False, allow_null=True, allow_blank=True)
+
+class CustomLoginSerializer(serializers.Serializer):
+    email = serializers.CharField(required=False, allow_blank=True)
+    username = serializers.CharField(required=False, allow_blank=True)
+    password = serializers.CharField(style={'input_type': 'password'})
+
+    def validate(self, attrs):
+        username = attrs.get('username')
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        # The flutter app currently sends the identifier in the 'email' field
+        identifier = email or username
+        if not identifier:
+            raise serializers.ValidationError("Must include 'email' (or phone number).")
+
+        user = None
+        user_qs = CustomUserModel.objects.filter(email=identifier)
+        if not user_qs.exists():
+            user_qs = CustomUserModel.objects.filter(phone_number=identifier)
+
+        if user_qs.exists():
+            user = user_qs.first()
+            if not user.check_password(password):
+                raise serializers.ValidationError("Incorrect password.")
+        else:
+            raise serializers.ValidationError("Account not found with this email or phone number.")
+
+        if not user.is_active:
+            raise serializers.ValidationError("User account is disabled.")
+
+        attrs['user'] = user
+        return attrs

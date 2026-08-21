@@ -297,6 +297,7 @@ REST_AUTH = {
     'JWT_AUTH_COOKIE': 'jwt-auth',
     'JWT_AUTH_REFRESH_COOKIE': 'jwt-refresh-auth',
     'JWT_AUTH_HTTPONLY': False, # Important for mobile apps to read the cookie/token
+    'LOGIN_SERIALIZER': 'apps.users.serializers.CustomLoginSerializer',
     'USER_DETAILS_SERIALIZER': 'apps.users.serializers.CustomUserModelSerializer',
     'PASSWORD_RESET_SERIALIZER': 'apps.users.serializers.CustomPasswordResetSerializer',
 }

@@ -4,6 +4,7 @@ from .views.profile import *
 from .views.registration import *
 from .views.auth import PasswordResetConfirmHTMLView, ManualPasswordResetConfirmView, DeleteAccountView
 from .views.social_auth import GoogleLoginView, AppleLoginView
+from .views.password_reset import RequestPasswordResetOTPView, ConfirmPasswordResetOTPView
 from rest_framework_simplejwt.views import TokenRefreshView
 from dj_rest_auth.views import PasswordResetConfirmView
 
@@ -27,6 +28,10 @@ urlpatterns = [
     path('signup/complete-profile/', CompleteProfileView.as_view()),
     path('signup/verify-parent/', VerifyParentApprovalView.as_view()),
     path('signup/resend-otp/', ResendOTPView.as_view(), name='resend-otp'),
+
+    # Custom OTP Password Reset
+    path('password/reset/otp/request/', RequestPasswordResetOTPView.as_view(), name='password_reset_otp_request'),
+    path('password/reset/otp/confirm/', ConfirmPasswordResetOTPView.as_view(), name='password_reset_otp_confirm'),
 
     # This adds: password/reset/, password/change/, login/, logout/, and user/
     path('auth/', include('dj_rest_auth.urls')),
