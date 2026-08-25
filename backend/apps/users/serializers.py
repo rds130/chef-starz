@@ -48,6 +48,12 @@ class KidSignupSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "You must provide either an email or a phone number."
             )
+        # Check uniqueness
+        if email and CustomUserModel.objects.filter(email=email).exists():
+            raise serializers.ValidationError({"email": ["This email is already in use."]})
+        if phone_number and CustomUserModel.objects.filter(phone_number=phone_number).exists():
+            raise serializers.ValidationError({"phone_number": ["This phone number is already in use."]})
+
         # Clean empty strings to None so the model doesn't store blanks
         if not email:
             attrs['email'] = None
