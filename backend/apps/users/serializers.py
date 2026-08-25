@@ -58,7 +58,7 @@ class KidSignupSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Using the manager you wrote to handle password hashing
         return CustomUserModel.objects.create_user(
-            email=validated_data.get('email') or '',
+            email=validated_data.get('email'),
             password=validated_data['password'],
             phone_number=validated_data.get('phone_number'),
         )
