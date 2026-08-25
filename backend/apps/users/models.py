@@ -10,7 +10,7 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('You must provide either an email or a phone number')
         if email:
             email = self.normalize_email(email)
-        user = self.model(email=email or '', **extra_fields)
+        user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -42,7 +42,7 @@ class CustomUserModel(AbstractBaseUser, PermissionsMixin):
     ]
 
     # defauld fields
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, blank=True, null=True)
     username = models.TextField(max_length=15, unique=True, blank=True, null=True)
 
 
@@ -79,7 +79,7 @@ class CustomUserModel(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     def __str__(self):
-        return self.email
+        return str(self.email or self.phone_number or self.id)
 
 
 class UserBlockModel(models.Model):
