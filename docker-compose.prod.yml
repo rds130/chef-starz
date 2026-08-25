@@ -1,6 +1,9 @@
 services:
   backend:
-    image: maruf318/chefstarz:backend-latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: chef_starz-backend
     container_name: chef_starz-backend
     ports:
       - "8000:8000"
