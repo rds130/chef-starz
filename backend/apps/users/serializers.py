@@ -34,16 +34,16 @@ class CustomUserModelSerializer(serializers.ModelSerializer):
 
 class KidSignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    email = serializers.EmailField(required=False, allow_blank=True)
-    phone_number = serializers.CharField(required=False, allow_blank=True)
+    email = serializers.EmailField(required=False, allow_blank=True, allow_null=True, default=None)
+    phone_number = serializers.CharField(required=False, allow_blank=True, allow_null=True, default=None)
 
     class Meta:
         model = CustomUserModel
         fields = ['email', 'phone_number', 'password']
 
     def validate(self, attrs):
-        email = attrs.get('email', '').strip()
-        phone_number = attrs.get('phone_number', '').strip()
+        email = (attrs.get('email') or '').strip()
+        phone_number = (attrs.get('phone_number') or '').strip()
         if not email and not phone_number:
             raise serializers.ValidationError(
                 "You must provide either an email or a phone number."
