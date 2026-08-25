@@ -14,7 +14,7 @@ class PostModel(models.Model):
 
     # default fields
     title = models.TextField(max_length=100)
-    description = models.TextField(max_length=500)
+    description = models.TextField(max_length=500, blank=True, null=True)
     media = models.FileField(upload_to='posts/media/', blank=True, null=True)
     post_type = models.CharField(max_length=10, choices=POST_TYPE_CHOICES, default='image')
     
