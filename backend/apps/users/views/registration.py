@@ -173,18 +173,13 @@ class CompleteProfileView(APIView):
 
 
 class VerifyParentApprovalView(APIView):
-    permission_classes = [AllowAny]
-    @swagger_auto_schema(request_body=OtpVerificationSerializer)
+    permission_classes = [IsAuthenticated]
+    @swagger_auto_schema(request_body=ParentOtpSerializer)
     def post(self, request):
-        serializer = OtpVerificationSerializer(data=request.data)
+        serializer = ParentOtpSerializer(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data.get('email')
             code = serializer.validated_data['code']
-            
-            try:
-                user = CustomUserModel.objects.get(email=email)
-            except CustomUserModel.DoesNotExist:
-                return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+            user = request.user
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
