@@ -232,6 +232,7 @@ class CustomLoginSerializer(serializers.Serializer):
             user = user_qs.first()
             if not user.check_password(password):
                 raise serializers.ValidationError("Incorrect password.")
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
         else:
             raise serializers.ValidationError("Account not found with this email or phone number.")
 
