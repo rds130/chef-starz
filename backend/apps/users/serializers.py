@@ -108,7 +108,7 @@ class ResendOtpSerializer(serializers.Serializer):
 
 
 class ProfileCompletionSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(write_only=True)
+    email = serializers.EmailField(write_only=True, required=False, allow_null=True, allow_blank=True)
 
     class Meta:
         model = CustomUserModel
@@ -118,6 +118,14 @@ class ProfileCompletionSerializer(serializers.ModelSerializer):
             'age_group': {'required': True},
             'parent_email': {'required': True},
         }
+
+    def validate_email(self, value):
+        if not value:
+            return None
+        user = self.instance
+        if CustomUserModel.objects.exclude(pk=user.pk).filter(email=value).exists():
+            raise serializers.ValidationError("This email is already in use.")
+        return value
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):

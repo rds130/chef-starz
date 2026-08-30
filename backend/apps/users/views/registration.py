@@ -130,23 +130,17 @@ class VerifyKidOTPView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+from rest_framework.permissions import IsAuthenticated
+
 class CompleteProfileView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     @swagger_auto_schema(request_body=ProfileCompletionSerializer)
     def post(self, request):
-        serializer = ProfileCompletionSerializer(data=request.data)
+        user = request.user
         
-        if serializer.is_valid():
-            email = serializer.validated_data.pop('email')
-            
-            try:
-                user = CustomUserModel.objects.get(email=email)
-            except CustomUserModel.DoesNotExist:
-                return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
-            # Ensure they verified via EITHER email or phone first!
-            if not user.is_email_verified and not user.is_phone_verified:
-                return Response({"error": "Verify your email or phone first"}, status=status.HTTP_403_FORBIDDEN)
+        # Ensure they verified via EITHER email or phone first!
+        if not user.is_email_verified and not user.is_phone_verified:
+            return Response({"error": "Verify your email or phone first"}, status=status.HTTP_403_FORBIDDEN)
 
             # Update the user instance with the rest of the data
             serializer = ProfileCompletionSerializer(user, data=request.data, partial=True)
@@ -174,8 +168,7 @@ class CompleteProfileView(APIView):
                     )
 
                 return Response({"message": "Profile updated. Code sent to parent."}, status=status.HTTP_200_OK)
-            
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
