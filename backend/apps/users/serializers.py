@@ -93,6 +93,9 @@ class OtpVerificationSerializer(serializers.Serializer):
             )
         return attrs
 
+class ParentOtpSerializer(serializers.Serializer):
+    code = serializers.CharField(max_length=6, min_length=6)
+
 class ResendOtpSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False)
     phone_number = serializers.CharField(required=False)
