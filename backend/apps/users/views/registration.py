@@ -142,33 +142,33 @@ class CompleteProfileView(APIView):
         if not user.is_email_verified and not user.is_phone_verified:
             return Response({"error": "Verify your email or phone first"}, status=status.HTTP_403_FORBIDDEN)
 
-            # Update the user instance with the rest of the data
-            serializer = ProfileCompletionSerializer(user, data=request.data, partial=True)
-            if serializer.is_valid():
-                user = serializer.save()
-                
-                # 1. Generate code for the PARENT
-                parent_otp = str(random.randint(100000, 999999))
-                user.verification_code = parent_otp
-                user.save()
-                
-                # 2. Send email to the PARENT
-                try:
-                    send_mail(
-                        subject="Action Required: Parental Consent",
-                        message=f"Your child is signing up. Provide them this code to approve: {parent_otp}",
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[user.parent_email],
-                        fail_silently=False,
-                    )
-                except Exception:
-                    return Response(
-                        {"error": "Failed to send email to parent. Please check email configuration."},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    )
+        # Update the user instance with the rest of the data
+        serializer = ProfileCompletionSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            user = serializer.save()
+            
+            # 1. Generate code for the PARENT
+            parent_otp = str(random.randint(100000, 999999))
+            user.verification_code = parent_otp
+            user.save()
+            
+            # 2. Send email to the PARENT
+            try:
+                send_mail(
+                    subject="Action Required: Parental Consent",
+                    message=f"Your child is signing up. Provide them this code to approve: {parent_otp}",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.parent_email],
+                    fail_silently=False,
+                )
+            except Exception:
+                return Response(
+                    {"error": "Failed to send email to parent. Please check email configuration."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
 
-                return Response({"message": "Profile updated. Code sent to parent."}, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "Profile updated. Code sent to parent."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
