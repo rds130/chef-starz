@@ -4,35 +4,51 @@ from apps.users.serializers import CustomUserModelSerializer
 
 # Create your serializers here.
 
-class LikeModelSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+class BaseInteractionSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    profile_picture = serializers.SerializerMethodField()
+
+    def get_user(self, obj):
+        if obj.user.username:
+            return obj.user.username
+        if obj.user.full_name:
+            return obj.user.full_name
+        if obj.user.email:
+            return obj.user.email.split('@')[0]
+        return str(obj.user.phone_number or obj.user.id)
+        
+    def get_profile_picture(self, obj):
+        request = self.context.get('request')
+        if obj.user.profile_picture:
+            if request:
+                return request.build_absolute_uri(obj.user.profile_picture.url)
+            return obj.user.profile_picture.url
+        return None
+
+class LikeModelSerializer(BaseInteractionSerializer):
     class Meta:
         model = LikeModel
-        fields = ['id', 'user', 'created_at']
+        fields = ['id', 'user', 'profile_picture', 'created_at']
 
-class CommentModelSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+class CommentModelSerializer(BaseInteractionSerializer):
     class Meta:
         model = CommentModel
-        fields = ['id', 'user', 'comment', 'created_at']
+        fields = ['id', 'user', 'profile_picture', 'comment', 'created_at']
 
-class ShareModelSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+class ShareModelSerializer(BaseInteractionSerializer):
     class Meta:
         model = ShareModel
-        fields = ['id', 'user', 'created_at']
+        fields = ['id', 'user', 'profile_picture', 'created_at']
 
-class PinModelSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+class PinModelSerializer(BaseInteractionSerializer):
     class Meta:
         model = PinModel
-        fields = ['id', 'user', 'created_at']
+        fields = ['id', 'user', 'profile_picture', 'created_at']
 
-class SaveModelSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+class SaveModelSerializer(BaseInteractionSerializer):
     class Meta:
         model = SaveModel
-        fields = ['id', 'user', 'created_at']
+        fields = ['id', 'user', 'profile_picture', 'created_at']
 
 class PostCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
