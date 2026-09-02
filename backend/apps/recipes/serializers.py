@@ -2,35 +2,51 @@ from rest_framework import serializers
 from .models import RecipeModel, StepByStepRecipeModel, RecipeLikeModel, RecipeCommentModel, RecipeShareModel, RecipePinModel, RecipeSaveModel
 from apps.users.serializers import CustomUserModelSerializer
 
-class RecipeLikeModelSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+class BaseInteractionSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    profile_picture = serializers.SerializerMethodField()
+
+    def get_user(self, obj):
+        if obj.user.username:
+            return obj.user.username
+        if obj.user.full_name:
+            return obj.user.full_name
+        if obj.user.email:
+            return obj.user.email.split('@')[0]
+        return str(obj.user.phone_number or obj.user.id)
+        
+    def get_profile_picture(self, obj):
+        request = self.context.get('request')
+        if obj.user.profile_picture:
+            if request:
+                return request.build_absolute_uri(obj.user.profile_picture.url)
+            return obj.user.profile_picture.url
+        return None
+
+class RecipeLikeModelSerializer(BaseInteractionSerializer):
     class Meta:
         model = RecipeLikeModel
-        fields = ['id', 'user', 'created_at']
+        fields = ['id', 'user', 'profile_picture', 'created_at']
 
-class RecipeCommentModelSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+class RecipeCommentModelSerializer(BaseInteractionSerializer):
     class Meta:
         model = RecipeCommentModel
-        fields = ['id', 'user', 'comment', 'created_at']
+        fields = ['id', 'user', 'profile_picture', 'comment', 'created_at']
 
-class RecipePinModelSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+class RecipePinModelSerializer(BaseInteractionSerializer):
     class Meta:
         model = RecipePinModel
-        fields = ['id', 'user', 'created_at']
+        fields = ['id', 'user', 'profile_picture', 'created_at']
 
-class RecipeSaveModelSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+class RecipeSaveModelSerializer(BaseInteractionSerializer):
     class Meta:
         model = RecipeSaveModel
-        fields = ['id', 'user', 'created_at']
+        fields = ['id', 'user', 'profile_picture', 'created_at']
 
-class RecipeShareModelSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+class RecipeShareModelSerializer(BaseInteractionSerializer):
     class Meta:
         model = RecipeShareModel
-        fields = ['id', 'user', 'created_at']
+        fields = ['id', 'user', 'profile_picture', 'created_at']
 
 class StepByStepRecipeModelSerializer(serializers.ModelSerializer):
     class Meta:
