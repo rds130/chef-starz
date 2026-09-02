@@ -11,11 +11,9 @@ class BaseInteractionSerializer(serializers.ModelSerializer):
     def get_user(self, obj):
         if obj.user.username:
             return obj.user.username
-        if obj.user.full_name:
-            return obj.user.full_name
         if obj.user.email:
             return obj.user.email.split('@')[0]
-        return str(obj.user.phone_number or obj.user.id)
+        return str(obj.user.id)
         
     def get_profile_picture(self, obj):
         request = self.context.get('request')
