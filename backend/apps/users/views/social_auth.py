@@ -1,63 +1,21 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import AllowAny
-from rest_framework_simplejwt.tokens import RefreshToken
-from drf_yasg.utils import swagger_auto_schema
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from allauth.socialaccount.providers.apple.views import AppleOAuth2Adapter
+from allauth.socialaccount.providers.apple.client import AppleOAuth2Client
+from dj_rest_auth.registration.views import SocialLoginView
 
-from ..models import CustomUserModel
-from ..serializers import (
-    GoogleLoginSerializer, 
-    AppleLoginSerializer, 
-    SocialUserRepresentationSerializer
-)
+class GoogleLoginView(SocialLoginView):
+    """
+    Secure Google login using dj-rest-auth.
+    Expects 'access_token' or 'id_token' in the request body.
+    """
+    adapter_class = GoogleOAuth2Adapter
+    client_class = OAuth2Client
 
-class GoogleLoginView(APIView):
-    permission_classes = [AllowAny]
-
-    @swagger_auto_schema(request_body=GoogleLoginSerializer)
-    def post(self, request):
-        serializer = GoogleLoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data['email']
-        
-        user, created = CustomUserModel.objects.get_or_create(email=email)
-        
-        refresh = RefreshToken.for_user(user)
-        user_data = SocialUserRepresentationSerializer(user).data
-        
-        return Response({
-            "success": True,
-            "created": created,
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-            "user": user_data
-        }, status=status.HTTP_200_OK)
-
-
-class AppleLoginView(APIView):
-    permission_classes = [AllowAny]
-
-    @swagger_auto_schema(request_body=AppleLoginSerializer)
-    def post(self, request):
-        serializer = AppleLoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data.get('email')
-        id_token = serializer.validated_data['id_token']
-        
-        if not email:
-            # Fallback for mock/trusted login
-            email = f"apple_{id_token[:10]}@icloud.com"
-            
-        user, created = CustomUserModel.objects.get_or_create(email=email)
-        
-        refresh = RefreshToken.for_user(user)
-        user_data = SocialUserRepresentationSerializer(user).data
-        
-        return Response({
-            "success": True,
-            "created": created,
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-            "user": user_data
-        }, status=status.HTTP_200_OK)
+class AppleLoginView(SocialLoginView):
+    """
+    Secure Apple login using dj-rest-auth.
+    Expects 'id_token' in the request body.
+    """
+    adapter_class = AppleOAuth2Adapter
+    client_class = AppleOAuth2Client

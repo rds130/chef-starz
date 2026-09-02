@@ -200,14 +200,6 @@ class SocialUserRepresentationSerializer(serializers.ModelSerializer):
         return "https://prommt.cc/profile_images/default_avatar.png"
 
 
-class GoogleLoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-
-
-class AppleLoginSerializer(serializers.Serializer):
-    id_token = serializers.CharField()
-    email = serializers.EmailField(required=False, allow_null=True, allow_blank=True)
-
 class CustomLoginSerializer(serializers.Serializer):
     email = serializers.CharField(required=False, allow_blank=True)
     username = serializers.CharField(required=False, allow_blank=True)
