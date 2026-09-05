@@ -60,26 +60,8 @@ class PostModelViewSet(ModelViewSet):
         if user_id:
             queryset = queryset.filter(user_id=user_id)
             
-        # Define what "today" and "recent" mean
-        today_threshold = timezone.now() - datetime.timedelta(days=1)
-        recent_threshold = timezone.now() - datetime.timedelta(days=7)
-        popular_threshold = 5  # Minimum likes + comments to be considered "Popular"
-            
-        # Annotate with total engagement AND groups
-        queryset = queryset.annotate(
-            total_engagement=Count('likes', distinct=True) + Count('comments', distinct=True)
-        ).annotate(
-            is_today=ExpressionWrapper(Q(created_at__gte=today_threshold), output_field=BooleanField()),
-            is_popular=ExpressionWrapper(Q(total_engagement__gte=popular_threshold), output_field=BooleanField()),
-            is_recent=ExpressionWrapper(Q(created_at__gte=recent_threshold), output_field=BooleanField())
-        )
-        
-        # 1. Today's posts (Tier 1)
-        # 2. Popular posts (Tier 2)
-        # 3. Recent 2-7 days posts (Tier 3)
-        # 4. Everything else (Tier 4)
-        # Tie-breaker is newest first inside each tier
-        queryset = queryset.order_by('-is_today', '-is_popular', '-is_recent', '-created_at')
+        # Option 1: Pure Chronological Sorting (Newest First)
+        queryset = queryset.order_by('-created_at')
 
         return queryset
 
