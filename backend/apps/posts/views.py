@@ -60,8 +60,10 @@ class PostModelViewSet(ModelViewSet):
         if user_id:
             queryset = queryset.filter(user_id=user_id)
             
-        # Option 1: Pure Chronological Sorting (Newest First)
-        queryset = queryset.order_by('-created_at')
+        # Option 1 Workaround: Sort Oldest First. 
+        # Since the live Flutter app has a bug that reverses the list, 
+        # sending them "Oldest First" will make them show up as "Newest First" in the app!
+        queryset = queryset.order_by('created_at')
 
         return queryset
 
